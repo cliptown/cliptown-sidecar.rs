@@ -12,9 +12,9 @@
 # No ores-sops in this image: secrets stay on the app container
 # (env/enc + sops-entrypoint) or a k8s Secret. Distroless has no shell.
 #
-# k8s contract:
+# k8s contract (see ores-otel/ores-otel-sidecar.rs/k8s/container.yaml):
 #   - bind CLIPTOWN_SIDECAR_BIND=127.0.0.1:9090 (loopback only)
-#   - livenessProbe exec ["/usr/local/bin/cliptown-sidecar", "probe"]
+#   - livenessProbe exec ["/cliptown-sidecar", "probe"]
 #   - no readinessProbe
 #   - do not publish :9090 on a Service
 #   - do not EXPOSE 4317/4318
@@ -31,9 +31,11 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-registry,sharin
     && cp "target/release/cliptown-sidecar" "/usr/local/bin/cliptown-sidecar"
 
 FROM gcr.io/distroless/cc-debian12:nonroot
-COPY --from=build --chown=65532:65532 "/usr/local/bin/cliptown-sidecar" "/usr/local/bin/cliptown-sidecar"
+# Binary lives at /<bin> so kubelet exec ["/cliptown-sidecar", "probe"] matches the
+# ores-otel sidecar contract (no curl, no /usr/local/bin prefix required).
+COPY --from=build --chown=65532:65532 "/usr/local/bin/cliptown-sidecar" "/cliptown-sidecar"
 ENV CLIPTOWN_SIDECAR_BIND=127.0.0.1:9090 \
     ORES_OTEL_SIDECAR_BIND=127.0.0.1:9090 \
     OTEL_SERVICE_NAME=cliptown-sidecar
 USER 65532:65532
-ENTRYPOINT ["/usr/local/bin/cliptown-sidecar"]
+ENTRYPOINT ["/cliptown-sidecar"]
