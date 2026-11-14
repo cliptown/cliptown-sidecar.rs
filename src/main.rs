@@ -18,7 +18,7 @@ fn main() {
         Err(_) => {
             eprintln!("invalid CLIPTOWN_SIDECAR_BIND; refusing to start");
             std::process::exit(2);
-        },
+        }
     };
     runtime::run(&cfg);
 }
