@@ -24,8 +24,8 @@ jobs:
           components: rustfmt, clippy
       - name: Verify pinned dependencies
         run: cargo metadata --locked --format-version 1 --no-deps >/dev/null
-      - name: Check rustfmt
-        run: cargo fmt --all -- --check
+      - name: Check rustfmt for handwritten roots (not generated flags2env modules)
+        run: cargo fmt --all -- --check --config skip_children=true
       - name: Test invalid bind fail-closed behavior
         run: cargo test --locked --all-targets
       - name: Clippy
