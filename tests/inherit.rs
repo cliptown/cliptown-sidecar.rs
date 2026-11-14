@@ -2,6 +2,9 @@
 
 #[path = "../generated/rust/env.rs"]
 mod env;
+// f2e-generated module preserves its canonical source formatting and branch
+// pattern; keep Clippy warnings denied for all handwritten Rust.
+#[allow(clippy::match_like_matches_macro)]
 #[path = "../generated/rust/runtime.rs"]
 mod env_runtime;
 
